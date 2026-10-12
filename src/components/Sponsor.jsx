@@ -1,11 +1,5 @@
 import React from "react";
 import { motion } from "framer-motion";
-import sponsor1 from "../assets/images/sponsor1.svg";
-import sponsor2 from "../assets/images/sponsor2.svg";
-import sponsor3 from "../assets/images/sponsor3.svg";
-import sponsor4 from "../assets/images/sponsor4.svg";
-import { NavItem } from "react-bootstrap";
-import { BASEURL } from "../Constant/API";
 import ImageComponent from "./ImageComponent";
 import { useNavigate } from "react-router-dom";
 import { fadeInLeft, fadeInUp, staggerContainer } from "../utils/animations";

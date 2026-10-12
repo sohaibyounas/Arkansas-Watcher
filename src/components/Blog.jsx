@@ -59,7 +59,7 @@ const PrevArrow = (props) => {
 };
 
 // Reusable card component for blog posts
-const BlogCard = ({ post, index, onClicked }) => (
+const BlogCard = ({ post, onClicked }) => (
   <motion.div
     whileHover={{ y: -6 }}
     transition={{ type: "spring", stiffness: 260 }}

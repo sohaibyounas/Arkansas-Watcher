@@ -12,7 +12,6 @@ function Main({
   topSponsor,
   weatherData,
   weatherLoading,
-  weatherError,
   presentLocation,
 }) {
   const [currentAlertIndex, setCurrentAlertIndex] = useState(0);

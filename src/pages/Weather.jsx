@@ -1,11 +1,10 @@
 import axios from "axios";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   IoSearchOutline,
   IoCloudOutline,
   IoRainyOutline,
-  IoThermometerOutline,
   IoSpeedometerOutline,
   IoSunnyOutline,
 } from "react-icons/io5";
@@ -18,6 +17,20 @@ import eye from "../assets/images/eye.svg";
 import sunCapital from "../assets/images/sunCapital.svg";
 import { BASEURL } from "../Constant/API";
 import { fadeInUp, staggerContainer } from "../utils/animations";
+
+const DEFAULT_LOCATION = {
+  latitude: 34.9697,
+  longitude: -92.3731,
+  name: "Arkansas, USA",
+};
+
+const LAYERS = {
+  clouds_new: "Clouds",
+  precipitation_new: "Precipitation",
+  pressure_new: "Pressure",
+  wind_new: "Wind",
+  temp_new: "Temperature",
+};
 
 // Shimmer component (placeholder for react-shimmer-effects)
 const ShimmerThumbnail = ({ height, width, className, style }) => (
@@ -48,24 +61,11 @@ function Weather() {
   const dropdownRef = useRef(null);
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
-  const DEFAULT_LOCATION = {
-    latitude: 34.9697,
-    longitude: -92.3731,
-    name: "Arkansas, USA",
-  };
 
   // Mapbox API key
   const mapboxToken = import.meta.env.VITE_MAPBOX_SECRET_TOKEN || "";
   const openWeatherApiKey =
     mapKey || import.meta.env.VITE_OPENWEATHER_API_KEY || "";
-
-  const layers = {
-    clouds_new: "Clouds",
-    precipitation_new: "Precipitation",
-    pressure_new: "Pressure",
-    wind_new: "Wind",
-    temp_new: "Temperature",
-  };
 
   // Load Mapbox GL JS
   useEffect(() => {
@@ -134,7 +134,7 @@ function Weather() {
       };
 
       const removeLayers = () => {
-        Object.keys(layers).forEach((layer) => {
+        Object.keys(LAYERS).forEach((layer) => {
           if (map.getLayer(layer)) {
             map.removeLayer(layer);
             map.removeSource(layer);
@@ -161,7 +161,7 @@ function Weather() {
         }
       }, 100);
     }
-  }, [location.latitude, location.longitude]);
+  }, [location.latitude, location.longitude, openWeatherApiKey]);
 
   // Handle layer changes
   const handleLayerChange = (layerName) => {
@@ -245,30 +245,33 @@ function Weather() {
   }, []);
 
   // Search for locations using Mapbox geocoding API
-  const searchLocations = async (query) => {
-    if (!query || query.trim() === "") {
-      setSearchResults([]);
-      setShowDropdown(false);
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-          query
-        )}.json?access_token=${mapboxToken}&types=place,locality,neighborhood&limit=5`
-      );
-      const data = await response.json();
-
-      if (data && data.features) {
-        setSearchResults(data.features);
-        setShowDropdown(true);
+  const searchLocations = useCallback(
+    async (query) => {
+      if (!query || query.trim() === "") {
+        setSearchResults([]);
+        setShowDropdown(false);
+        return;
       }
-    } catch (error) {
-      console.error("Error searching for locations:", error);
-      setSearchResults([]);
-    }
-  };
+
+      try {
+        const response = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+            query
+          )}.json?access_token=${mapboxToken}&types=place,locality,neighborhood&limit=5`
+        );
+        const data = await response.json();
+
+        if (data && data.features) {
+          setSearchResults(data.features);
+          setShowDropdown(true);
+        }
+      } catch (error) {
+        console.error("Error searching for locations:", error);
+        setSearchResults([]);
+      }
+    },
+    [mapboxToken]
+  );
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -278,7 +281,7 @@ function Weather() {
     return () => {
       clearTimeout(handler);
     };
-  }, [searchTerm]);
+  }, [searchTerm, searchLocations]);
 
   const weatherKeyParam =
     weatherKey || import.meta.env.VITE_WEATHER_API_KEY || "";
@@ -312,7 +315,7 @@ function Weather() {
       }
     };
     fetchWeatherData();
-  }, [location.latitude, location.longitude, selectedLocation]);
+  }, [location.latitude, location.longitude, selectedLocation, weatherKeyParam]);
 
   const handleLocationSelect = (feature) => {
     const [longitude, latitude] = feature.center;
@@ -367,23 +370,6 @@ function Weather() {
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = String(date.getFullYear()).slice(-2);
     return `${day}/${month}/${year}`;
-  };
-
-  const getLayerIcon = (layerKey) => {
-    switch (layerKey) {
-      case "clouds_new":
-        return <IoCloudOutline />;
-      case "precipitation_new":
-        return <IoRainyOutline />;
-      case "pressure_new":
-        return <IoSpeedometerOutline />;
-      case "wind_new":
-        return <IoSpeedometerOutline />;
-      case "temp_new":
-        return <IoSunnyOutline />;
-      default:
-        return <IoThermometerOutline />;
-    }
   };
 
   return (

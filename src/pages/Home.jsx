@@ -16,9 +16,7 @@ import axios from "axios";
 import { BASEURL } from "../Constant/API";
 
 function Home() {
-  const [homeData, setHomeData] = useState(null);
   const [topSponsor, setTopSponsor] = useState("");
-  const [team, setTeam] = useState("");
   const [sponsors, setSponsors] = useState("");
   const [socialPost, setSocialPost] = useState("");
   const [snapshots, setSnapshots] = useState("");
@@ -30,23 +28,19 @@ function Home() {
   const [weatherData, setWeatherData] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
   const [weatherError, setWeatherError] = useState(null);
-  const [faqData, setFaqData] = useState(null);
   const [presentLocation, setPresentLocation] = useState("");
-  const [weatherKey, setWeatherKey] = useState("")
+  const [weatherKey, setWeatherKey] = useState("");
   const [facebookToken, setFacebookToken] = useState("");
   const [PageId, setPageId] = useState("");
 
   useEffect(() => {
     const fetchHomeData = async () => {
-      try { 
+      try {
         const response = await axios.get(`${BASEURL}/main/home`);
-        setHomeData(response.data.data);
         setTopSponsor(response.data.data.topSponsor);
-        setTeam(response.data.data.teams);
         setSponsors(response.data.data.sponsors);
         setSocialPost(response.data.data.posts);
         setSnapshots(response.data.data.snapshots);
-        setFaqData(response.data.data.faqs);
         setWeatherKey(response.data.data.weather_key);
         setPageId(response.data.data.facebook_page_id.value);
         setFacebookToken(response.data.data.facebook_page_access_token.value);
@@ -78,9 +72,9 @@ function Home() {
           });
           console.error(
             "Geolocation error, using default Arkansas coordinates:",
-            error.message
+            error.message,
           );
-        }
+        },
       );
     } else {
       // Use Arkansas coordinates as default if geolocation is not supported
@@ -90,7 +84,7 @@ function Home() {
         error: "Geolocation is not supported by this browser.",
       });
       console.error(
-        "Geolocation is not supported, using default Arkansas coordinates."
+        "Geolocation is not supported, using default Arkansas coordinates.",
       );
     }
   }, []);
@@ -100,9 +94,9 @@ function Home() {
 
   // Fetch weather data when location is available
   useEffect(() => {
-    const fetchWeatherData = async () => {
-      const { latitude, longitude } = location;
+    const { latitude, longitude } = location;
 
+    const fetchWeatherData = async () => {
       // Only proceed if we have latitude and longitude
       if (!latitude || !longitude) return;
 
@@ -114,8 +108,10 @@ function Home() {
 
         const response = await axios.get(url);
         setWeatherData(response.data);
-         if (response.data.location) {
-          setPresentLocation(`${response.data.location.name}, ${response.data.location.country}`);
+        if (response.data.location) {
+          setPresentLocation(
+            `${response.data.location.name}, ${response.data.location.country}`,
+          );
         }
       } catch (error) {
         console.error("Error fetching weather data:", error);
@@ -126,7 +122,7 @@ function Home() {
     };
 
     fetchWeatherData();
-  }, [location.latitude, location.longitude]);
+  }, [location, weatherKeyParam]);
 
   return (
     <>

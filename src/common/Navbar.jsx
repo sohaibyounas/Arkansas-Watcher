@@ -3,7 +3,6 @@ import { Nav } from 'react-bootstrap';
 import { NavLink, Link } from 'react-router-dom';
 import axios from 'axios'; // Added axios import
 import { motion, AnimatePresence } from 'framer-motion';
-import logo from '../assets/images/logo.svg';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../assets/css/style.css';
 import {
@@ -54,17 +53,6 @@ function Navbar() {
   const [formSuccess, setFormSuccess] = useState('');
   const [imagePreview, setImagePreview] = useState(null);
   const [header, setHeader] = useState('');
-  const [mainLogo, setMainLogo] = useState('');
-
-  const [errors, setErrors] = useState({
-    name: '',
-    email: '',
-    phone_number: '',
-    company_name: '',
-    advertise_file: '',
-    message: '',
-    url: ''
-  });
 
   const toggle = () => {
     setModal(!modal);
@@ -90,7 +78,6 @@ function Navbar() {
       try {
         const response = await axios.get(`${BASEURL}/main/home`);
         setHeader(response.data.data.header);
-        setMainLogo(response.data.data.logo);
       } catch (error) {
         console.error("Error fetching home data:", error);
       }
@@ -107,6 +94,17 @@ function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -167,7 +165,7 @@ function Navbar() {
     const validFileTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'];
 
     if (formData.url.trim()) {
-      const urlRegex = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+([\/\w-]*)*$/;
+      const urlRegex = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+([/\w-]*)*$/;
       if (!urlRegex.test(formData.url.trim())) {
         return false;
       }
@@ -329,10 +327,11 @@ function Navbar() {
             height: "30px",
             cursor: "pointer",
             zIndex: 1500,
+            visibility: menuOpen ? "hidden" : "visible",
           }}
         >
           <div
-            className={`burger-line ${menuOpen ? "line-1-active" : ""}`}
+            className="burger-line"
             style={{
               position: "absolute",
               width: "26px",
@@ -340,11 +339,11 @@ function Navbar() {
               backgroundColor: "#fff",
               borderRadius: "2px",
               transition: "all 0.3s ease",
-              top: menuOpen ? "11px" : "0",
+              top: "2px",
             }}
           ></div>
           <div
-            className={`burger-line ${menuOpen ? "line-2-active" : ""}`}
+            className="burger-line"
             style={{
               position: "absolute",
               width: "26px",
@@ -352,12 +351,11 @@ function Navbar() {
               backgroundColor: "#fff",
               borderRadius: "2px",
               transition: "all 0.3s ease",
-              top: "11px",
-              opacity: menuOpen ? "0" : "1",
+              top: "12px",
             }}
           ></div>
           <div
-            className={`burger-line ${menuOpen ? "line-3-active" : ""}`}
+            className="burger-line"
             style={{
               position: "absolute",
               width: "26px",
@@ -365,7 +363,7 @@ function Navbar() {
               backgroundColor: "#fff",
               borderRadius: "2px",
               transition: "all 0.3s ease",
-              top: menuOpen ? "11px" : "22px",
+              top: "22px",
             }}
           ></div>
         </div>
@@ -386,20 +384,80 @@ function Navbar() {
               left: 0,
               width: "100%",
               height: "100%",
-              backgroundColor: "rgba(0, 0, 0, 0.96)",
-              zIndex: 1040,
-              overflowY: "auto",
+              backgroundColor: "rgba(0, 0, 0, 0.98)",
+              zIndex: 2000,
+              display: "flex",
+              flexDirection: "column",
             }}
           >
-            <div className="container min-vh-100 py-5 d-flex flex-column justify-content-center align-items-center">
-              <ul className="list-unstyled text-center mb-4">
+            {/* Always-visible Mobile Overlay Header with Close Icon */}
+            <div
+              className="d-flex align-items-center justify-content-between px-3 px-sm-4 py-3 w-100"
+              style={{ flexShrink: 0 }}
+            >
+              <Link
+                className="d-flex align-items-center text-white text-decoration-none"
+                to="/"
+                onClick={toggleMenu}
+              >
+                <img
+                  src="/weather.svg"
+                  alt="LOGO"
+                  style={{ width: "44px" }}
+                />
+              </Link>
+
+              <motion.button
+                type="button"
+                aria-label="Close Menu"
+                onClick={toggleMenu}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.92 }}
+                className="btn p-0 border-0 d-flex align-items-center justify-content-center"
+                style={{
+                  position: "relative",
+                  width: "40px",
+                  height: "40px",
+                  cursor: "pointer",
+                  background: "transparent",
+                }}
+              >
+                <span
+                  className="line-1-active"
+                  style={{
+                    position: "absolute",
+                    width: "26px",
+                    height: "3px",
+                    backgroundColor: "#FF5B63",
+                    borderRadius: "2px",
+                  }}
+                ></span>
+                <span
+                  className="line-3-active"
+                  style={{
+                    position: "absolute",
+                    width: "26px",
+                    height: "3px",
+                    backgroundColor: "#FF5B63",
+                    borderRadius: "2px",
+                  }}
+                ></span>
+              </motion.button>
+            </div>
+
+            {/* Mobile Menu Links */}
+            <div
+              className="container flex-grow-1 d-flex flex-column justify-content-center align-items-center pb-4"
+              style={{ overflowY: "auto" }}
+            >
+              <ul className="list-unstyled text-center mb-3 w-100">
                 {navItems.map((item, index) => (
                   <motion.li
                     key={item.path}
-                    className="mb-3"
-                    initial={{ opacity: 0, y: 20 }}
+                    className="mb-2 mb-sm-3"
+                    initial={{ opacity: 0, y: 18 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.08 * index, duration: 0.3 }}
+                    transition={{ delay: 0.06 * index, duration: 0.28 }}
                   >
                     {item.external ? (
                       <a
@@ -407,7 +465,7 @@ function Navbar() {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={toggleMenu}
-                        className="albertsemibold d-block py-2 text-decoration-none text-white fs-4"
+                        className="albertsemibold d-block py-1 py-sm-2 text-decoration-none text-white fs-5 fs-sm-4"
                       >
                         {item.label.toUpperCase()}
                       </a>
@@ -416,7 +474,7 @@ function Navbar() {
                         to={item.path}
                         onClick={toggleMenu}
                         className={({ isActive }) =>
-                          `albertsemibold d-block py-2 text-decoration-none text-white fs-4 ${
+                          `albertsemibold d-block py-1 py-sm-2 text-decoration-none text-white fs-5 fs-sm-4 ${
                             isActive ? "text-danger" : ""
                           }`
                         }
@@ -428,15 +486,15 @@ function Navbar() {
                 ))}
               </ul>
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.3 }}
+                transition={{ delay: 0.45, duration: 0.28 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   toggleMenu();
                   toggle();
                 }}
-                className="btn-danger text-decoration-none px-4 py-2 fw-semibold text-white rounded albertsemibold"
+                className="btn-danger text-decoration-none px-4 py-2 fw-semibold text-white rounded albertsemibold mt-1"
                 style={{ background: "#FF5B63", cursor: "pointer" }}
               >
                 Advertise With Us

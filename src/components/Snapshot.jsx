@@ -139,12 +139,6 @@ function Snapshot() {
     }
   };
 
-  // Display file name
-  const getFileName = () => {
-    if (file) return file.name;
-    return "Upload a file";
-  };
-
   return (
     <div
       className="min-vh-100 bg-dark bg-cover bg-center text-white overflow-hidden"

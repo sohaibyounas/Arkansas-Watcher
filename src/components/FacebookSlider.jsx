@@ -47,7 +47,6 @@ const PrevArrow = ({ onClick }) => (
 function FacebookSlider({ facebookToken, pageId }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   // Fetch Facebook posts
   useEffect(() => {
@@ -98,7 +97,6 @@ function FacebookSlider({ facebookToken, pageId }) {
           "Error fetching Facebook data:",
           err.response?.data || err.message
         );
-        setError("Failed to load Facebook posts. Showing fallback content.");
         setLoading(false);
       }
     };
